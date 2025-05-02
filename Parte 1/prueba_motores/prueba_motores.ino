@@ -1,11 +1,13 @@
-// Pines del L298N conectados al Arduino
+// Motor A
 #define IN1 8
 #define IN2 7
+
+//Motor B
 #define IN3 5
 #define IN4 4
 
 void setup() {
-  // Definir pines como salida
+  // Definir pines de salida
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
   pinMode(IN3, OUTPUT);
@@ -17,23 +19,23 @@ void setup() {
 void loop() {
   Serial.println("Adelante");
   moverAdelante();
-  delay(3000);
+  delay(2000); // Espera de 2s.
 
   Serial.println("Atrás");
   moverAtras();
-  delay(3000);
+  delay(2000); // Espera de 2s.
 
   Serial.println("Giro izquierda");
   girarIzquierda();
-  delay(3000);
+  delay(2000); // Espera de 2s.
 
   Serial.println("Giro derecha");
   girarDerecha();
-  delay(3000);
+  delay(2000); // Espera de 2s.
 
   Serial.println("Parado");
   detener();
-  delay(10000);
+  delay(5000); // Espera de 5s.
 }
 
 void moverAdelante() {
