@@ -47,21 +47,20 @@ Para cada módulo, se incluye lo siguiente
     * Arduino IDE
     * Fritzing
 
+* **Videos de funcionamiento:** No pudimos usar la batería, por lo que tampoco pudimos dejar moverse al robot de forma independiente. En los videos se aprecia que el controlador está alimentado por un transformador de 12V y Arduino por USB.
+
+    * https://www.youtube.com/shorts/1LMhyDZ6efY - Estimación de la posición 
+    * https://youtube.com/shorts/COtxGe7M7BY?si=nvGuJBWiBRo-TiwJ - Variación de velocidad + movimientos (adelante, atrás, izquierda, derecha)
+
 Esta entrega se divide en dos módulos. Adicionalmente, se incluye un **esquema de conexión** de componentes.
 
 ### Parte 1: Identificación de componentes y configuración
 
-* Conectar Arduino UNO con el driver de motores **L298N** y programar el movimiento básico de los motores (adelante, atrás, giro) sin controlar la
-velocidad.
+* Conectar Arduino UNO con el driver de motores **L298N** y programar el movimiento básico de los motores (adelante, atrás, giro) sin controlar la velocidad.
 * Verificar el funcionamiento del sensor ultrasónico **HC-SR04** midiendo
 distancias.
 * Analizar los datos del IMU **MPU6050** para medir inclinación o giros
 del robot.
-
-#### Videos del funcionamiento
-
-* 1
-* 2
 
 #### Preguntas Parte 1
 
@@ -109,11 +108,6 @@ ajustar su dirección en tiempo real, realizando correcciones en el movimiento d
 * Programar el PWM para controlar la velocidad de los motores y hacer
 que el robot se mueva a diferentes velocidades sin IMU, variando el
 tiempo de activación de los motores.
-
-#### Videos del funcionamiento
-
-* 3
-* 4
 
 #### Preguntas Parte 2
 
