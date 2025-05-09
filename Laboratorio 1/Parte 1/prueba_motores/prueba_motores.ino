@@ -35,7 +35,7 @@ void loop() {
 
   Serial.println("Parado");
   detener();
-  delay(5000); // Espera de 5s.
+  delay(5000); // Espera de 3s.
 }
 
 void moverAdelante() {
