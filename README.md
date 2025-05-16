@@ -1,4 +1,4 @@
-# Proyecto ICI4150
+# Laboratorios ICI4150
 
 Este repositorio contiene los laboratorios prácticos y actividades desarrolladas en el ramo Robótica y Sistemas Autónomos, primer semestre del año 2025.
  
@@ -19,10 +19,10 @@ Para cada módulo, se incluye lo siguiente
 
 ## Anexos
 
-* Enlace al repositorio: https://github.com/viice57/Proyecto-ICI4150.git
+* Enlace al repositorio: https://github.com/viice57/Laboratorios-ICI4150.git
 * Descarga Arduino IDE: https://www.arduino.cc/en/software/
 * Descarga Fritzing: https://github.com/fritzing/fritzing-app/releases/
-* Esquema actual (act. 15/05/25): https://github.com/viice57/Proyecto-ICI4150/tree/main/Laboratorio 2/Esquema.png
+* Esquema actual (act. 15/05/25): https://github.com/viice57/Laboratorios-ICI4150/blob/main/Laboratorio%202/Esquema.png
 
 ---
 
