@@ -22,7 +22,7 @@ Para cada módulo, se incluye lo siguiente
 * Enlace al repositorio: https://github.com/viice57/Laboratorios-ICI4150.git
 * Descarga Arduino IDE: https://www.arduino.cc/en/software/
 * Descarga Fritzing: https://github.com/fritzing/fritzing-app/releases/
-* Esquema actual (act. 15/05/25): https://github.com/viice57/Laboratorios-ICI4150/blob/main/Laboratorio%202/Esquema.png
+* Esquema actual (act. 18/05/25): https://github.com/viice57/Laboratorios-ICI4150/blob/main/Laboratorio%202/Esquema.png
 
 ---
 
