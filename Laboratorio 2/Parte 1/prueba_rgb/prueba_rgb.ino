@@ -10,7 +10,7 @@ const float distanciaCorreccion = 0.0; // corrección empírica (cm)
 // === TCS34725 Sensor RGB ===
 // Ventana de integración larga + ganancia 1×
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(
-  TCS34725_INTEGRATIONTIME_700MS,
+  TCS34725_INTEGRATIONTIME_600MS,
   TCS34725_GAIN_1X
 );
 

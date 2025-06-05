@@ -1,5 +1,5 @@
 // Pines de control de dirección
-#define IN1 8
+#define IN1 6
 #define IN2 7
 #define IN3 5
 #define IN4 4

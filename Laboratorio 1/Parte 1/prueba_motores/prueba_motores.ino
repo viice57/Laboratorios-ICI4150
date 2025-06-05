@@ -1,5 +1,5 @@
 // Motor A
-#define IN1 8
+#define IN1 6
 #define IN2 7
 
 //Motor B

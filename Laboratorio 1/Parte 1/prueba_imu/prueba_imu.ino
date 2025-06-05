@@ -71,12 +71,12 @@ void loop() {
   mpu.accelUpdate();
   mpu.gyroUpdate();
 
-  float ax = -(mpu.accelX() - accelBiasX) * 9.81;
-  float ay = -(mpu.accelY() - accelBiasY) * 9.81;
+  float ax = (mpu.accelX() - accelBiasX) * 9.81;
+  float ay = (mpu.accelY() - accelBiasY) * 9.81;
   float az = (mpu.accelZ() - accelBiasZ) * 9.81;
 
-  float gx = -(mpu.gyroX() - gyroBiasX); // en °/s
-  float gy = -(mpu.gyroY() - gyroBiasY);
+  float gx = mpu.gyroX() - gyroBiasX; // en °/s
+  float gy = mpu.gyroY() - gyroBiasY;
   float gz = mpu.gyroZ() - gyroBiasZ;
 
   float ax_f = filter(ax_buffer, ax);
