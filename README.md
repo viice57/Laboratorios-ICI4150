@@ -23,7 +23,7 @@ Para este laboratorio, se incluye lo siguiente dentro de las secciones y como an
 - Descarga Arduino IDE: https://www.arduino.cc/en/software/
 - Descarga Fritzing: https://github.com/fritzing/fritzing-app/releases/
 - Esquema actual (act. 04/06/25): ![Esquema](https://github.com/viice57/Laboratorios-ICI4150/blob/Laboratorio-2/Imágenes/Esquema.png)
-- Imagen del robot: ![Frente](https://github.com/viice57/Laboratorios-ICI4150/blob/Laboratorio-2/Imágenes/Frente.png)
+- Imagen del robot: ![Frente](https://github.com/viice57/Laboratorios-ICI4150/blob/Laboratorio-2/Imágenes/Frente.jpg)
 
 ---
 
