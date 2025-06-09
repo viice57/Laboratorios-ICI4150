@@ -57,7 +57,16 @@ Tanto para la parte 1 como para la parte 2, se utilizó el mismo esquema definid
 
 A grandes rasgos, no fue difícil incorporar el sensor HC-SR04 (Ultrasónico), dado que su uso es bastante intuitivo y no requiere mayor corrección; aunque, en el caso del sensor TCS34725 (Detector de luz RGB) sí tuvimos algunas dificultades al momento de definir los umbrales para detectar color, más no al conectarlo con el resto de componentes.
 
-Para finalizar, dentro de las mejoras que se realizaron están: La disposición de cada componente fue mejorada con respecto al Laboratorio 1 para mejorar la estética y para poder dar espacio a otros sensores y actuadores. También se decidió usar dos baterías 18650 en serie como única fuente de alimentación para todo el robot (7.4V nominal), en respuesta a los problemas previos con la batería PP3 (9V nominal).
+Dentro de los cambios que se realizaron están: La disposición de cada componente fue mejorada con respecto al Laboratorio 1 para mejorar la estética y para poder dar espacio a otros sensores y actuadores. También se decidió usar dos baterías 18650 en serie como única fuente de alimentación para todo el robot (7.4V nominal), en respuesta a los problemas previos con la batería PP3 (9V nominal).
+
+Para finalizar, en cuanto a **aspectos que se podían haber hecho mejor**, están los siguientes:
+
+* Realizar pruebas más rigurosas, tomando en consideración los valores crudos obtenidos al escanear objetos de cierto color. Esto, con el fin de obtener umbrales certeros.
+* Si bien el ultrasónico tiene una precisión aceptable, no definimos pruebas que confirmen y cuantifiquen la precisión de la lectura. Pero así como está, funciona, aunque desconocemos si es suficiente.
+
+La resolución de esta parte se encuentra en un único código, el cual puede ser probado en la carpeta ./Parte 1/prueba_rgb/prueba_Rgb.ino.
+
+Video demostración funcionamiento: [Prueba Parte 1](https://youtu.be/_vvucj3FgL8?si=6QBas3WSQJlHyLBW)
 
 ### Criterios de evaluación
 * Conectar los sensores ultrasónico HC-SR04 y TCS34725 en Arduino.
@@ -96,7 +105,9 @@ En la parte 2 de este laboratorio, para los obstáculos se definieron los siguie
 * **Verde:** El robot puede continuar navegando, aunque debe ejecutar un cambio de luz con 2 parpadeos.
 * **Azul:** Indica que el robot puede continuar, pero debe cambiar su dirección en múltiplos de 90°.
 
-En cuanto a dificultades, lo más difícil y mejorable fue la navegación entre obstáculos, incluyendo la interacción con colores como el azul. Ocupando el IMU se pierde algo de precisión y es difícil hacer que el robot navegue sin impactar algún elemento del entorno.
+La prueba consiste en que el robot deba moverse 50cm en línea recta, donde encontrará un obstáculo verde justo a su izquierda, pero puede continuar sin impactarlo (debe parpadear el LED 2 veces para indicar que ha recibido la instrucción). Al continuar, 50cm más adelante, existe un objeto azul justo en frente de él, por lo que tendrá que rotar 90 grados a su derecha cuando se encuentre justo en el margen de detección. Luego, debe pasar por otro objeto azul ante el cual debe rotar nuevamente 90 grados a su derecha. Finalmente, continúa en línea recta hacia un objeto rojo, por lo que debe detener su marcha cuando lo tenga en el margen de detección.
+
+En cuanto a dificultades, lo más difícil fue la navegación entre obstáculos, incluyendo la interacción con colores como el azul. Ocupando el IMU se pierde algo de precisión y es difícil hacer que el robot navegue sin impactar algún elemento del entorno.
 
 ### Criterios de evaluación
 * Aplicar umbralización al sensor ultrasónico para detectar si hay un

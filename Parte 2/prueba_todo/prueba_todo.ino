@@ -1,192 +1,194 @@
 #include <Wire.h>
-#include <MPU9250_asukiaaa.h>      // IMU (acelerómetro + giroscopio)
-#include <Adafruit_TCS34725.h>     // Sensor RGB
-#include <Servo.h>                 // Control de servomotor
+#include "Adafruit_TCS34725.h"
 
-// Ultrasonido (HC-SR04)
-#define TRIG_PIN    2
-#define ECHO_PIN    3
-// Servomotor para barrido
-#define SERVO_PIN   11
-// Driver L298N motores
-#define IN1         6
-#define IN2         7
-#define IN3         5
-#define IN4         4
-#define ENA         9
-#define ENB         10
+// ——— Motor A ———
+#define IN1 6
+#define IN2 7
+// ——— Motor B ———
+#define IN3 5
+#define IN4 4
+// ——— Pines de velocidad ———
+#define ENA 9
+#define ENB 10
 
-// — Umbrales de detección —
-// Obstáculo ultrasonido < 10 cm
-const float DIST_THRESHOLD   = 10.0;
-// Umbrales normalizados RGB (0–1)
-const float RED_THRESHOLD    = 0.5;
-const float GREEN_THRESHOLD  = 0.5;
-const float BLUE_THRESHOLD   = 0.5;
+// ——— Sensor ultrasónico ———
+const int trigPin = 2;
+const int echoPin = 3;
+const int numDistReadings = 10;
+const float distanciaCorreccion = 0.0;
+const int umbral = 10;         // cm
+// ——— LED indicador ———
+const int ledPin = 8;
 
-// IMU (filtro complementario)
-MPU9250_asukiaaa mpu;
-float currentAngle = 0, accelAngle = 0;
-const float ALPHA = 0.98;
-unsigned long prevTime = 0;
-
-// Sensor RGB (media móvil ventana 3)
-Adafruit_TCS34725 tcs(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
-const int WINDOW_SIZE = 3;
-float windowR[WINDOW_SIZE] = {0}, windowG[WINDOW_SIZE] = {0}, windowB[WINDOW_SIZE] = {0};
-int windowIndex = 0;
-
-// Ultrasonido (ventana de 5 mediciones)
-const int DIST_WINDOW = 5;
-float distWindow[DIST_WINDOW] = {0};
-int distIndex = 0;
-
-// Servomotor y control de motores
-Servo servo;
-
-// — Funciones auxiliares —
-
-// 1) Medir distancia con HC-SR04 + media móvil
-float readDistance() {
-  digitalWrite(TRIG_PIN, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIG_PIN, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG_PIN, LOW);
-  long dur = pulseIn(ECHO_PIN, HIGH);
-  float d = dur * 0.034f / 2.0f;  // cm (v sonido ≈ 343 m/s)
-  distWindow[distIndex] = d;
-  distIndex = (distIndex + 1) % DIST_WINDOW;
-  float sum = 0;
-  for (int i = 0; i < DIST_WINDOW; i++) sum += distWindow[i];
-  return sum / DIST_WINDOW;
-}
-
-// 2) Barrido ultrasonoro con servo
-void scanUltrasonic(float &minDist, int &angleAtMin) {
-  minDist = 1000; angleAtMin = 0;
-  for (int ang = 0; ang <= 180; ang += 30) {
-    servo.write(ang);
-    delay(200);
-    float d = readDistance();
-    if (d < minDist) { minDist = d; angleAtMin = ang; }
-  }
-  servo.write(90);
-  delay(200);
-}
-
-// 3) Actualizar IMU + filtro complementario
-void updateIMU() {
-  unsigned long now = millis();
-  float dt = (now - prevTime) / 1000.0;
-  prevTime = now;
-  mpu.accelUpdate();
-  mpu.gyroUpdate();
-  accelAngle = atan2(-mpu.accelY(), -mpu.accelX()) * 180.0 / PI;
-  currentAngle = ALPHA * (currentAngle + mpu.gyroZ() * dt)
-               + (1 - ALPHA) * accelAngle;
-}
-
-// 4) Lectura color + media móvil
-void readColor(float &rAve, float &gAve, float &bAve, uint16_t &c) {
-  uint16_t r, g, b;
-  tcs.getRawData(&r, &g, &b, &c);
-  float fr = (float)r / c, fg = (float)g / c, fb = (float)b / c;
-  windowR[windowIndex] = fr;
-  windowG[windowIndex] = fg;
-  windowB[windowIndex] = fb;
-  windowIndex = (windowIndex + 1) % WINDOW_SIZE;
-  rAve = gAve = bAve = 0;
-  for (int i = 0; i < WINDOW_SIZE; i++) {
-    rAve += windowR[i];
-    gAve += windowG[i];
-    bAve += windowB[i];
-  }
-  rAve /= WINDOW_SIZE;
-  gAve /= WINDOW_SIZE;
-  bAve /= WINDOW_SIZE;
-}
-
-// 5) Control simple de motores
-void drive(int leftPWM, int rightPWM, bool forward = true) {
-  digitalWrite(IN1, forward);
-  digitalWrite(IN2, !forward);
-  digitalWrite(IN3, forward);
-  digitalWrite(IN4, !forward);
-  analogWrite(ENA, leftPWM);
-  analogWrite(ENB, rightPWM);
-}
-
-// 6) Maniobra según color detectado
-void handleColorDecision(float r, float g, float b) {
-  if (r > RED_THRESHOLD && g < GREEN_THRESHOLD && b < BLUE_THRESHOLD) {
-    // rojo → gira izquierda
-    drive(80, 100, true);
-  }
-  else if (g > GREEN_THRESHOLD && r < RED_THRESHOLD && b < BLUE_THRESHOLD) {
-    // verde → recto
-    drive(100, 100, true);
-  }
-  else if (b > BLUE_THRESHOLD && r < RED_THRESHOLD && g < GREEN_THRESHOLD) {
-    // azul → gira derecha
-    drive(100, 80, true);
-  }
-  else {
-    // desconocido → retrocede
-    drive(80, 80, false);
-    delay(300);
-  }
-}
+// ——— Sensor de color TCS34725 ———
+Adafruit_TCS34725 tcs(TCS34725_INTEGRATIONTIME_600MS,
+                      TCS34725_GAIN_1X);
+float prev_fr[3] = {0}, prev_fg[3] = {0}, prev_fb[3] = {0};
+int colorIndex = 0;
+float a_r = 1.0, b_r = 0.0;
+float a_g = 1.0, b_g = 0.0;
+float a_b = 1.0, b_b = 0.0;
 
 void setup() {
-  Serial.begin(115200);
-  Wire.begin();
-
-  // IMU
-  mpu.setWire(&Wire);
-  mpu.beginAccel();
-  mpu.beginGyro();
-  prevTime = millis();
-
-  // Sensor RGB
-  if (!tcs.begin()) {
-    Serial.println("Error TCS34725");
-    while (1);
-  }
-
-  // Servomotor
-  servo.attach(SERVO_PIN);
-
-  // Ultrasonido
-  pinMode(TRIG_PIN, OUTPUT);
-  pinMode(ECHO_PIN, INPUT);
-
-  // Motores
+  Serial.begin(9600);
+  // Pines motores
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
   pinMode(ENA, OUTPUT);
   pinMode(ENB, OUTPUT);
+
+  // Pines sensor ultrasónico y LED
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+
+  // Inicializar TCS34725
+  if (tcs.begin()) {
+    Serial.println("Sensor TCS34725 detectado.");
+  } else {
+    Serial.println("No se encontró TCS34725. Revisa conexiones.");
+    while (1);
+  }
 }
 
 void loop() {
-  // 1) Escaneo ultrasonoro
-  float dMin; int angMin;
-  scanUltrasonic(dMin, angMin);
+  // — 1) Lectura de distancia —
+  float promD = leerDistanciaPromedio();
+  Serial.print("Distancia promedio: ");
+  Serial.print(promD, 2);
+  Serial.println(" cm");
 
-  // 2) Si obstáculo cercano
-  if (dMin < DIST_THRESHOLD) {
-    drive(0, 0, false);
-    float r, g, b; uint16_t c;
-    readColor(r, g, b, c);
-    handleColorDecision(r, g, b);
-    return;
+  // Obstacle handling
+  if (promD <= umbral) {
+    Serial.println("¡Obstáculo detectado!");
+    digitalWrite(ledPin, HIGH);
+    detener();
+  } else {
+    digitalWrite(ledPin, LOW);
   }
 
-  // 3) Si libre: mantener rumbo con IMU y avanzar
-  updateIMU();
-  float error = currentAngle;            // objetivo = 0°
-  int corr = constrain((int)(error * 2), -30, 30);
-  drive(90 - corr, 90 + corr, true);
+  // — 2) Detección de color —
+  detectarYMostrarColor();
+
+  // — 3) Secuencia de movimiento —
+  Serial.println("Adelante");
+  moverAdelante();
+  delay(2000);
+
+  Serial.println("Atrás");
+  moverAtras();
+  delay(2000);
+
+  Serial.println("Giro izquierda");
+  girarIzquierda();
+  delay(2000);
+
+  Serial.println("Giro derecha");
+  girarDerecha();
+  delay(2000);
+
+  Serial.println("Parado");
+  detener();
+  delay(5000);
+}
+
+// —— Funciones de motor ——
+void moverAdelante() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, 255);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, 255);
+}
+void moverAtras() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, 255);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENB, 255);
+}
+void girarIzquierda() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, 255);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, 255);
+}
+void girarDerecha() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, 255);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENB, 255);
+}
+void detener() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, 0);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, 0);
+}
+
+// —— Funciones de sensor ultrasónico ——
+float medirDistancia() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  long dur = pulseIn(echoPin, HIGH);
+  return dur * 0.034f / 2.0f;  // cm
+}
+float leerDistanciaPromedio() {
+  float suma = 0;
+  for (int i = 0; i < numDistReadings; i++) {
+    suma += medirDistancia();
+    delay(50);
+  }
+  return suma / numDistReadings + distanciaCorreccion;
+}
+
+// —— Funciones de detección de color ——
+void detectarColor(float r, float g, float b) {
+  if (r > g && r > b) Serial.print("ROJO");
+  else if (g > r && g > b) Serial.print("VERDE");
+  else if (b > r && b > g) Serial.print("AZUL");
+  else Serial.print("DESCONOCIDO");
+}
+void detectarYMostrarColor() {
+  uint16_t r, g, b, c;
+  tcs.getRawData(&r, &g, &b, &c);
+  if (c == 0) c = 1;
+  float fr = (float)r / c;
+  float fg = (float)g / c;
+  float fb = (float)b / c;
+
+  prev_fr[colorIndex] = fr;
+  prev_fg[colorIndex] = fg;
+  prev_fb[colorIndex] = fb;
+  colorIndex = (colorIndex + 1) % 3;
+
+  float avg_r = (prev_fr[0] + prev_fr[1] + prev_fr[2]) / 3.0;
+  float avg_g = (prev_fg[0] + prev_fg[1] + prev_fg[2]) / 3.0;
+  float avg_b = (prev_fb[0] + prev_fb[1] + prev_fb[2]) / 3.0;
+
+  float Rcal = a_r * avg_r + b_r;
+  float Gcal = a_g * avg_g + b_g;
+  float Bcal = a_b * avg_b + b_b;
+
+  Serial.print(" | Raw RGB: ");
+  Serial.print(r); Serial.print(","); Serial.print(g); Serial.print(","); Serial.print(b);
+  Serial.print(" | Norm RGB: ");
+  Serial.print(avg_r, 3); Serial.print(","); Serial.print(avg_g, 3); Serial.print(","); Serial.print(avg_b, 3);
+  Serial.print(" | Color: ");
+  detectarColor(Rcal, Gcal, Bcal);
+  Serial.println();
+  delay(200);
 }
